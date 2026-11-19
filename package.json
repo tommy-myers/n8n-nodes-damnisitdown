@@ -1,0 +1,60 @@
+{
+	"name": "n8n-nodes-damnisitdown",
+	"version": "0.1.0",
+	"description": "n8n community node for Damn Is It Down: check a service's live status and trigger workflows on confirmed outages and recoveries.",
+	"license": "MIT",
+	"homepage": "https://damnisitdown.com/integrations",
+	"keywords": [
+		"n8n-community-node-package",
+		"n8n",
+		"outage",
+		"status",
+		"uptime",
+		"damnisitdown"
+	],
+	"author": {
+		"name": "Big Toy Market LLC",
+		"email": "support@bigtoymarket.com"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/tommy-myers/n8n-nodes-damnisitdown.git"
+	},
+	"bugs": {
+		"url": "https://github.com/tommy-myers/n8n-nodes-damnisitdown/issues",
+		"email": "support@bigtoymarket.com"
+	},
+	"scripts": {
+		"build": "n8n-node build",
+		"build:watch": "tsc --watch",
+		"dev": "n8n-node dev",
+		"lint": "n8n-node lint",
+		"lint:fix": "n8n-node lint --fix",
+		"release": "n8n-node release",
+		"prepublishOnly": "n8n-node prerelease"
+	},
+	"files": [
+		"dist"
+	],
+	"n8n": {
+		"n8nNodesApiVersion": 1,
+		"strict": true,
+		"credentials": [
+			"dist/credentials/DamnIsItDownApi.credentials.js"
+		],
+		"nodes": [
+			"dist/nodes/DamnIsItDown/DamnIsItDown.node.js",
+			"dist/nodes/DamnIsItDown/DamnIsItDownTrigger.node.js"
+		]
+	},
+	"devDependencies": {
+		"@n8n/node-cli": "^0.57.4",
+		"eslint": "9.39.4",
+		"prettier": "3.8.3",
+		"release-it": "20.2.0",
+		"typescript": "5.9.3"
+	},
+	"peerDependencies": {
+		"n8n-workflow": "*"
+	}
+}
