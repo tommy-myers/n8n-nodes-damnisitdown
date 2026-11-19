@@ -1,6 +1,6 @@
 {
 	"name": "n8n-nodes-damnisitdown",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"description": "n8n community node for Damn Is It Down: check a service's live status and trigger workflows on confirmed outages and recoveries.",
 	"license": "MIT",
 	"homepage": "https://damnisitdown.com/integrations",
