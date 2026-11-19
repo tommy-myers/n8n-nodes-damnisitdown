@@ -1,0 +1,40 @@
+{
+  "name": "Damn Is It Down: confirmed outage to Slack",
+  "nodes": [
+    {
+      "parameters": {
+        "event": "down",
+        "service": "*"
+      },
+      "id": "6f2c1b0e-1a2b-4c3d-8e9f-000000000001",
+      "name": "Damn Is It Down Trigger",
+      "type": "n8n-nodes-damnisitdown.damnIsItDownTrigger",
+      "typeVersion": 1,
+      "position": [0, 0],
+      "webhookId": "6f2c1b0e-1a2b-4c3d-8e9f-0000000000aa"
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "#outages",
+          "mode": "name"
+        },
+        "text": "=:rotating_light: {{ $json.message }}\n{{ $json.summary }}\n{{ $json.service.url }}",
+        "otherOptions": {}
+      },
+      "id": "6f2c1b0e-1a2b-4c3d-8e9f-000000000002",
+      "name": "Post to Slack",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [260, 0]
+    }
+  ],
+  "connections": {
+    "Damn Is It Down Trigger": {
+      "main": [[{ "node": "Post to Slack", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": {}
+}

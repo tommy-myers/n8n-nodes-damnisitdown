@@ -1,0 +1,79 @@
+{
+  "name": "Damn Is It Down: check a service every 15 minutes",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [{ "field": "minutes", "minutesInterval": 15 }]
+        }
+      },
+      "id": "7a3d2c1f-2b3c-4d5e-9f00-000000000001",
+      "name": "Every 15 minutes",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [0, 0]
+    },
+    {
+      "parameters": {
+        "operation": "checkStatus",
+        "service": "github"
+      },
+      "id": "7a3d2c1f-2b3c-4d5e-9f00-000000000002",
+      "name": "Check Status",
+      "type": "n8n-nodes-damnisitdown.damnIsItDown",
+      "typeVersion": 1,
+      "position": [240, 0]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "loose" },
+          "conditions": [
+            {
+              "id": "7a3d2c1f-2b3c-4d5e-9f00-0000000000c1",
+              "leftValue": "={{ $json.verdict.level }}",
+              "rightValue": "operational",
+              "operator": { "type": "string", "operation": "notEquals" }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "7a3d2c1f-2b3c-4d5e-9f00-000000000003",
+      "name": "Not operational?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [480, 0]
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "#outages",
+          "mode": "name"
+        },
+        "text": "={{ $json.service.name }}: {{ $json.verdict.title }}\n{{ $json.verdict.summary }}\n{{ $json.service.url }}",
+        "otherOptions": {}
+      },
+      "id": "7a3d2c1f-2b3c-4d5e-9f00-000000000004",
+      "name": "Post to Slack",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [720, -100]
+    }
+  ],
+  "connections": {
+    "Every 15 minutes": {
+      "main": [[{ "node": "Check Status", "type": "main", "index": 0 }]]
+    },
+    "Check Status": {
+      "main": [[{ "node": "Not operational?", "type": "main", "index": 0 }]]
+    },
+    "Not operational?": {
+      "main": [[{ "node": "Post to Slack", "type": "main", "index": 0 }], []]
+    }
+  },
+  "settings": {}
+}
