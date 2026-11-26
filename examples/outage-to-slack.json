@@ -4,7 +4,11 @@
     {
       "parameters": {
         "event": "down",
-        "service": "*"
+        "service": {
+          "__rl": true,
+          "mode": "list",
+          "value": "*"
+        }
       },
       "id": "6f2c1b0e-1a2b-4c3d-8e9f-000000000001",
       "name": "Damn Is It Down Trigger",

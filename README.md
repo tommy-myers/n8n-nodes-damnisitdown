@@ -16,7 +16,7 @@ n8n-nodes-damnisitdown
 
 **Damn Is It Down** (action node)
 
-- **Check Status**: look up the live status of a service you pick from the list.
+- **Check Status**: look up the live status of a service you pick from the list, or enter a slug like `github`.
 
 **Damn Is It Down Trigger** (webhook trigger)
 
@@ -34,6 +34,8 @@ You need a Damn Is It Down API key. Free keys work.
 2. In n8n, add a **Damn Is It Down API** credential and paste the key.
 
 n8n tests the key when you save the credential.
+
+The Service field loads its list when you open it, after the credential is attached. You can also switch the field to Slug and type a slug like `github`.
 
 ## Example workflows
 

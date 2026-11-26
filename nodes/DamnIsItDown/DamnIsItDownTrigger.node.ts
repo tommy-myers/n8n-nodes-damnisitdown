@@ -1,16 +1,16 @@
 import type {
 	IHookFunctions,
-	JsonObject,
 	ILoadOptionsFunctions,
-	INodePropertyOptions,
+	INodeListSearchResult,
 	INodeType,
 	INodeTypeDescription,
 	IWebhookFunctions,
 	IWebhookResponseData,
+	JsonObject,
 } from 'n8n-workflow';
 import { NodeApiError, NodeConnectionTypes } from 'n8n-workflow';
 
-const BASE = 'https://damnisitdown.com';
+import { BASE, searchServices, serviceLocator, serviceSlug } from './services';
 
 export class DamnIsItDownTrigger implements INodeType {
 	description: INodeTypeDescription = {
@@ -57,43 +57,17 @@ export class DamnIsItDownTrigger implements INodeType {
 				required: true,
 				description: 'Which alert should start the workflow. Early warnings are not sent.',
 			},
-			{
-				displayName: 'Service Name or ID',
-				name: 'service',
-				type: 'options',
-				typeOptions: { loadOptionsMethod: 'getServices' },
-				default: '*',
-				required: true,
-				description:
-					'Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>',
-			},
+			serviceLocator(true, '*'),
 		],
 	};
 
 	methods = {
-		loadOptions: {
-			async getServices(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
-				const data = (await this.helpers.httpRequestWithAuthentication.call(
-					this,
-					'damnIsItDownApi',
-					{
-						method: 'GET',
-						url: `${BASE}/api/v1/integrations/services`,
-						json: true,
-					},
-				)) as {
-					any?: { id?: string; name?: string };
-					services?: Array<{ id?: string; slug?: string; name?: string }>;
-				};
-				const any = {
-					name: (data.any && data.any.name) || 'Any service we track',
-					value: (data.any && data.any.id) || '*',
-				};
-				const rest = (data.services || []).map((s) => ({
-					name: s.name || s.slug || '',
-					value: s.id || s.slug || '',
-				}));
-				return [any, ...rest];
+		listSearch: {
+			async searchServicesIncludingAny(
+				this: ILoadOptionsFunctions,
+				filter?: string,
+			): Promise<INodeListSearchResult> {
+				return await searchServices.call(this, filter, true);
 			},
 		},
 	};
@@ -107,7 +81,7 @@ export class DamnIsItDownTrigger implements INodeType {
 			async create(this: IHookFunctions): Promise<boolean> {
 				const webhookUrl = this.getNodeWebhookUrl('default');
 				const event = this.getNodeParameter('event') as string;
-				const service = this.getNodeParameter('service') as string;
+				const service = serviceSlug(this.getNodeParameter('service'));
 				const response = (await this.helpers.httpRequestWithAuthentication.call(
 					this,
 					'damnIsItDownApi',

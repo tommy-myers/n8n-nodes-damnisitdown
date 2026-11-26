@@ -3,13 +3,13 @@ import type {
 	IExecuteFunctions,
 	ILoadOptionsFunctions,
 	INodeExecutionData,
-	INodePropertyOptions,
+	INodeListSearchResult,
 	INodeType,
 	INodeTypeDescription,
 } from 'n8n-workflow';
 import { NodeConnectionTypes, NodeOperationError } from 'n8n-workflow';
 
-const BASE = 'https://damnisitdown.com';
+import { BASE, searchServices, serviceLocator, serviceSlug } from './services';
 
 export class DamnIsItDown implements INodeType {
 	description: INodeTypeDescription = {
@@ -21,7 +21,7 @@ export class DamnIsItDown implements INodeType {
 		},
 		group: ['transform'],
 		version: 1,
-		subtitle: '={{$parameter["operation"] + ": " + $parameter["service"]}}',
+		subtitle: '={{$parameter["operation"] + ": " + ($parameter["service"].value || $parameter["service"])}}',
 		description: 'Check the live status of a service on Damn Is It Down',
 		defaults: { name: 'Damn Is It Down' },
 		inputs: [NodeConnectionTypes.Main],
@@ -44,35 +44,17 @@ export class DamnIsItDown implements INodeType {
 				],
 				default: 'checkStatus',
 			},
-			{
-				displayName: 'Service Name or ID',
-				name: 'service',
-				type: 'options',
-				typeOptions: { loadOptionsMethod: 'getServices' },
-				default: '',
-				required: true,
-				description:
-					'Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>',
-			},
+			serviceLocator(false, ''),
 		],
 	};
 
 	methods = {
-		loadOptions: {
-			async getServices(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
-				const data = (await this.helpers.httpRequestWithAuthentication.call(
-					this,
-					'damnIsItDownApi',
-					{
-						method: 'GET',
-						url: `${BASE}/api/v1/integrations/services`,
-						json: true,
-					},
-				)) as { services?: Array<{ id?: string; slug?: string; name?: string }> };
-				return (data.services || []).map((s) => ({
-					name: s.name || s.slug || '',
-					value: s.id || s.slug || '',
-				}));
+		listSearch: {
+			async searchServices(
+				this: ILoadOptionsFunctions,
+				filter?: string,
+			): Promise<INodeListSearchResult> {
+				return await searchServices.call(this, filter, false);
 			},
 		},
 	};
@@ -81,7 +63,7 @@ export class DamnIsItDown implements INodeType {
 		const items = this.getInputData();
 		const out: INodeExecutionData[] = [];
 		for (let i = 0; i < items.length; i++) {
-			const service = (this.getNodeParameter('service', i) as string).trim().toLowerCase();
+			const service = serviceSlug(this.getNodeParameter('service', i));
 			if (!service || service === '*') {
 				throw new NodeOperationError(this.getNode(), 'Pick one service to check.', {
 					itemIndex: i,
